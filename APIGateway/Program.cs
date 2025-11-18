@@ -1,25 +1,29 @@
 
-namespace APIGateway
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddReverseProxy()
-                .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+// Authentication
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddJwtBearer(options =>
+//    {
+//        options.Authority = "https://<keycloak-host>/realms/myrealm";
+//        options.Audience = "my-dotnet-client";
+//        options.RequireHttpsMetadata = true;
 
-            var app = builder.Build();
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidateAudience = true,
+//            ValidateIssuer = true
+//        };
+//    });
 
-            //app.UseHttpsRedirection();
 
-            //app.UseAuthorization();
-            app.MapReverseProxy();
+builder.Services.AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
-            app.Run();
-        }
-    }
-}
+var app = builder.Build();
+
+
+app.MapReverseProxy();
+
+app.Run();
