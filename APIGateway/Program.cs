@@ -1,4 +1,4 @@
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,9 +20,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
+    {
+        options.Authority = "http://localhost:18080/realms/instaclone";
+        options.Audience = "public-client";
+        options.RequireHttpsMetadata = false;
+    });
 
+builder.Services.AddAuthorization();
 var app = builder.Build();
 
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapReverseProxy();
 
