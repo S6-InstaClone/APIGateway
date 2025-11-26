@@ -49,13 +49,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(options =>
 {
-    // Default policy - requires authenticated user
+    // Policy for routes that require authentication
     options.AddPolicy("authenticated", policy =>
         policy.RequireAuthenticatedUser());
 
-    // Anonymous policy - no auth required
-    options.AddPolicy("anonymous", policy =>
-        policy.RequireAssertion(_ => true));
+    // Note: For anonymous/public routes, don't specify AuthorizationPolicy in YARP config
+    // YARP treats routes without a policy as public by default
 });
 
 // YARP Reverse Proxy
