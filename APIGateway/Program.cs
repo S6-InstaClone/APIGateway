@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +20,17 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(serviceName: "APIGateway"))
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddPrometheusExporter();
+    });
 
 // JWT Authentication with Keycloak
 // Authority URL: use config or default to localhost for local dev
@@ -66,7 +79,7 @@ var app = builder.Build();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 // Map reverse proxy with custom transforms
 app.MapReverseProxy(proxyPipeline =>
 {
